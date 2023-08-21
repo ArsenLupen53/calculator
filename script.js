@@ -1,76 +1,102 @@
-// Variables to track calculator state
-let firstNumber = '';
-let operator = '';
-let secondNumber = '';
-let result = '';
-let decimalAdded = false;
+let currentInput = '';
+const display = document.getElementById('display');
 
-// Function to update the display
-function updateDisplay() {
-    document.getElementById('display').value = result || secondNumber || firstNumber || '0';
+function appendToDisplay(value) {
+    currentInput += value;
+    display.textContent = currentInput; 
 }
 
-// Function to handle button clicks
-document.querySelector('.buttons').addEventListener('click', function (event) {
-    const clickedButton = event.target;
-    const buttonValue = clickedButton.value;
+function clearDisplay() {
+    currentInput = '';
+    display.textContent = '0';
+}
 
-    if (!isNaN(buttonValue) || buttonValue === '.') {
-        if (operator === '') {
-            if (buttonValue === '.' && decimalAdded) {
-                return;
-            }
-            firstNumber += buttonValue;
+function calculate() {
+    try {
+        const result = evaluateExpression(currentInput);
+        if (result !== null) {
+            currentInput = result.toString();
+            display.textContent = currentInput;
         } else {
-            if (buttonValue === '.' && decimalAdded) {
-                return;
-            }
-            secondNumber += buttonValue;
+            display.textContent = 'Error';
         }
-    } else if (buttonValue === '+' || buttonValue === '-' || buttonValue === '*' || buttonValue === '/') {
-        operator = buttonValue;
-        decimalAdded = false;
-    } else if (buttonValue === '=') {
-        if (operator && secondNumber) {
-            firstNumber = parseFloat(firstNumber);
-            secondNumber = parseFloat(secondNumber);
-            switch (operator) {
-                case '+':
-                    result = firstNumber + secondNumber;
-                    break;
-                case '-':
-                    result = firstNumber - secondNumber;
-                    break;
-                case '*':
-                    result = firstNumber * secondNumber;
-                    break;
-                case '/':
-                    if (secondNumber === 0) {
-                        result = 'Error';
-                    } else {
-                        result = firstNumber / secondNumber;
-                    }
-                    break;
+    } catch (error) {
+        display.textContent = 'Error';
+    }
+}
+
+function evaluateExpression(expression) {
+    const operators = ['+', '-', '*', '/'];
+    const numbers = [];
+    const ops = [];
+
+    let numBuffer = '';
+
+    for (const char of expression) {
+        if (!isNaN(parseFloat(char)) || char === '.') {
+            numBuffer += char;
+        } else if (operators.includes(char)) {
+            if (numBuffer !== '') {
+                numbers.push(parseFloat(numBuffer));
+                numBuffer = '';
             }
-            decimalAdded = false;
-            operator = '';
-            secondNumber = '';
-        }
-    } else if (buttonValue === 'C') {
-        firstNumber = '';
-        operator = '';
-        secondNumber = '';
-        result = '';
-        decimalAdded = false;
-    } else if (buttonValue === '←') {
-        if (operator && secondNumber) {
-            secondNumber = secondNumber.slice(0, -1);
-        } else if (operator) {
-            operator = '';
-        } else if (firstNumber) {
-            firstNumber = firstNumber.slice(0, -1);
+            while (ops.length > 0 && hasPrecedence(char, ops[ops.length - 1])) {
+                numbers.push(ops.pop());
+            }
+            ops.push(char);
         }
     }
 
-    updateDisplay();
-});
+    if (numBuffer !== '') {
+        numbers.push(parseFloat(numBuffer));
+    }
+
+    while (ops.length > 0) {
+        numbers.push(ops.pop());
+    }
+
+    return evaluatePostfix(numbers);
+}
+
+function hasPrecedence(op1, op2) {
+    if ((op1 === '*' || op1 === '/') && (op2 === '+' || op2 === '-')) {
+        return false;
+    }
+    return true;
+}
+
+function evaluatePostfix(expression) {
+    const stack = [];
+
+    for (const token of expression) {
+        if (!isNaN(token)) {
+            stack.push(token);
+        } else {
+            const operand2 = stack.pop();
+            const operand1 = stack.pop();
+
+            if (operand1 === undefined || operand2 === undefined) {
+                return null;
+            }
+
+            switch (token) {
+                case '+':
+                    stack.push(operand1 + operand2);
+                    break;
+                case '-':
+                    stack.push(operand1 - operand2);
+                    break;
+                case '*':
+                    stack.push(operand1 * operand2);
+                    break;
+                case '/':
+                    stack.push(operand1 / operand2);
+                    break;
+                default:
+                    return null;
+            }
+        }
+    }
+
+    return stack.pop();
+}
