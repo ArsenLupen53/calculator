@@ -1,9 +1,14 @@
 let currentInput = '';
+let isResultDisplayed = false;
 const display = document.getElementById('display');
 
 function appendToDisplay(value) {
+    if (isResultDisplayed) {
+        currentInput = ''; // Clear the input if a result is displayed
+        isResultDisplayed = false;
+    }
     currentInput += value;
-    display.textContent = currentInput; 
+    display.textContent = currentInput;
 }
 
 function clearDisplay() {
@@ -17,6 +22,7 @@ function calculate() {
         if (result !== null) {
             currentInput = result.toString();
             display.textContent = currentInput;
+            isResultDisplayed = true;
         } else {
             display.textContent = 'Error';
         }
@@ -24,6 +30,7 @@ function calculate() {
         display.textContent = 'Error';
     }
 }
+
 
 function evaluateExpression(expression) {
     const operators = ['+', '-', '*', '/'];
