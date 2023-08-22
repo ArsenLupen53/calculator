@@ -1,10 +1,10 @@
 let currentInput = '';
 let isResultDisplayed = false;
-const display = document.getElementById('display');
+const display = document.getElementById("display");
 
 function appendToDisplay(value) {
     if (isResultDisplayed) {
-        currentInput = ''; // Clear the input if a result is displayed
+        currentInput = '';
         isResultDisplayed = false;
     }
     currentInput += value;
@@ -12,8 +12,8 @@ function appendToDisplay(value) {
 }
 
 function clearDisplay() {
-    currentInput = '';
-    display.textContent = '0';
+    currentInput = "";
+    display.textContent = "0";
 }
 
 function calculate() {
@@ -24,37 +24,37 @@ function calculate() {
             display.textContent = currentInput;
             isResultDisplayed = true;
         } else {
-            display.textContent = 'Error';
+            display.textContent = "Error";
         }
-    } catch (error) {
-        display.textContent = 'Error';
+    }   catch (error) {
+        display.textContent = "Error";
     }
 }
 
-
 function evaluateExpression(expression) {
-    const operators = ['+', '-', '*', '/'];
+    const operators = ["+", "-", "*", "/"];
     const numbers = [];
     const ops = [];
 
-    let numBuffer = '';
-
+    let numBuffer = "";
+/*check here again */
     for (const char of expression) {
-        if (!isNaN(parseFloat(char)) || char === '.') {
+        if (!isNaN(parseFloat(char)) || char === ".") {
             numBuffer += char;
-        } else if (operators.includes(char)) {
-            if (numBuffer !== '') {
+        }   else if (operators.includes(char)) {
+            if (numBuffer !== "") {
                 numbers.push(parseFloat(numBuffer));
-                numBuffer = '';
+                numBuffer = "";
             }
             while (ops.length > 0 && hasPrecedence(char, ops[ops.length - 1])) {
                 numbers.push(ops.pop());
             }
             ops.push(char);
+
         }
     }
 
-    if (numBuffer !== '') {
+    if (numBuffer !== "") {
         numbers.push(parseFloat(numBuffer));
     }
 
@@ -66,11 +66,13 @@ function evaluateExpression(expression) {
 }
 
 function hasPrecedence(op1, op2) {
-    if ((op1 === '*' || op1 === '/') && (op2 === '+' || op2 === '-')) {
+    if ((op1 === "*" || op1 === "/") && (op2 === "+" || op2 === "-")) {
         return false;
-    }
+    } 
     return true;
 }
+
+
 
 function evaluatePostfix(expression) {
     const stack = [];
@@ -81,22 +83,23 @@ function evaluatePostfix(expression) {
         } else {
             const operand2 = stack.pop();
             const operand1 = stack.pop();
+        
 
             if (operand1 === undefined || operand2 === undefined) {
-                return null;
+            return null;
             }
 
             switch (token) {
-                case '+':
+                case "+": 
                     stack.push(operand1 + operand2);
                     break;
-                case '-':
+                case "-":
                     stack.push(operand1 - operand2);
                     break;
-                case '*':
+                case "*":
                     stack.push(operand1 * operand2);
                     break;
-                case '/':
+                case "/":
                     stack.push(operand1 / operand2);
                     break;
                 default:
@@ -104,6 +107,5 @@ function evaluatePostfix(expression) {
             }
         }
     }
-
     return stack.pop();
 }
